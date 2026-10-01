@@ -267,6 +267,7 @@ local NotificationLibrary = {
 local Container = Instance.new("ScreenGui")
 Container.Name = Abysall.ESPLibrary:GenerateRandomString()
 Container.Parent = GetHiddenContainer()
+Abysall.Cleanup:Add(Container)
 Container.DisplayOrder = 32767
 Container.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -479,7 +480,7 @@ Globals.DoorsNotify = function(NotifyOptions)
 	end)
 end
 
-Globals.STX = loadstring(game:HttpGet("https://raw.githubusercontent.com/lukasos-gd/Abysall-Fork/refs/heads/main/Components/STX.luau"))()
+Globals.STX = Abysall.Load("Components/STX.luau")
 Functions.Notify = function(Settings)
 	local HiddenContainer = GetHiddenContainer()
 
@@ -2523,7 +2524,7 @@ Groupboxes.Floors_Farming:AddButton({
 	DoubleClick = true,
 	Tooltip = "Automatically farms deaths, joining new runs.",
 	Func = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/lukasos-gd/Abysall-Fork/refs/heads/main/Scripts/DeathFarm.luau"))()
+		Abysall.Load("Scripts/DeathFarm.luau")
 	end,
 
 	Disabled = not Functions.CheckCompatability({"fireproximityprompt", "firesignal"}),
@@ -4590,6 +4591,7 @@ Library:OnUnload(function()
 	CollisionClone:Destroy()
 	CollisionPartClone:Destroy()
 	Abysall.ESPLibrary:Unload()
+	Abysall.Cleanup:Run()
 
 	if Main_Game then
 		Main_Game.fovtarget   = 70
