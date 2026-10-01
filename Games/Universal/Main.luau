@@ -19,7 +19,7 @@ Bindable.OnInvoke = function(Response)
 end
 
 Services.StarterGui:SetCore("SendNotification", {
-    Title = "Abysall Hub",
+    Title = "Abysall Fork",
     Text = "Only DOORS is supported right now, sorry :)",
     Duration = 10,
     Button1 = "Copy Discord Invite",
