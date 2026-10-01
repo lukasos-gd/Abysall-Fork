@@ -904,6 +904,9 @@ local Window = Library:CreateWindow({
 	TabPadding = 4,
 	MenuFadeTime = 0.15,
 	CornerRadius = 8,
+	DisableSearch = false,
+	MobileButtonsSide = "Left",
+	Size = Library.IsMobile and UDim2.fromOffset(500, 300) or UDim2.fromOffset(720, 600),
 })
 
 Abysall.Interface.ApplyInfoTab(Window)
@@ -915,7 +918,7 @@ local Tabs = {
 	Floors   = Window:AddTab("Floors", "earth"),
 }
 
-Groupboxes.General_Character = Tabs.General:AddLeftGroupbox("Character")
+Groupboxes.General_Character = Tabs.General:AddLeftGroupbox("Character", "user")
 Groupboxes.General_Character:AddSlider("SpeedBoostSlider", {
 	Text = "Speed Boost", Min = 0, Max = 100, Default = 0, Rounding = 0, Compact = true
 })
@@ -990,7 +993,7 @@ Toggles.EnableCharacterSlide:OnChanged(function(Value)
 	end
 end)
 
-Groupboxes.General_Self = Tabs.General:AddLeftGroupbox("Self")
+Groupboxes.General_Self = Tabs.General:AddLeftGroupbox("Self", "heart")
 Groupboxes.General_Self:AddToggle("DoorReachToggle", {
 	Text = "Door Reach", Default = false, Tooltip = "Allows you to open doors from further away."
 })
@@ -1038,7 +1041,7 @@ Toggles.PromptClip:OnChanged(function(Value)
 	end
 end)
 
-Groupboxes.Self_Automation = Tabs.General:AddRightGroupbox("Automation")
+Groupboxes.Self_Automation = Tabs.General:AddRightGroupbox("Automation", "bot")
 Groupboxes.Self_Automation:AddToggle("AutoBreakerBox", {
 	Text = "Auto Breaker Box", Default = false, Tooltip = "Automatically solves the breaker box."
 })
@@ -1109,7 +1112,7 @@ Groupboxes.Self_Automation:AddDropdown("SpecateEntityMode", {
 	AllowNull = true
 })
 
-Groupboxes.Self_Misc = Tabs.General:AddRightGroupbox("Miscellaneous")
+Groupboxes.Self_Misc = Tabs.General:AddRightGroupbox("Miscellaneous", "layers")
 Groupboxes.Self_Misc:AddButton({
 	Text = "Play Again", Tooltip = "Makes you join a new run, click again to cancel.", DoubleClick = true,
 	Func = function() RemotesFolder.PlayAgain:FireServer() end
@@ -1142,7 +1145,7 @@ Groupboxes.Self_Misc:AddButton({
 	end
 })
 
-Groupboxes.Exploits_Bypass = Tabs.Exploits:AddLeftGroupbox("Bypass")
+Groupboxes.Exploits_Bypass = Tabs.Exploits:AddLeftGroupbox("Bypass", "shield")
 Groupboxes.Exploits_Bypass:AddToggle("BypassGiggle",         { Text = "Bypass Giggle",           Default = false, Tooltip = "Prevents 'Giggle' from attacking you." })
 Groupboxes.Exploits_Bypass:AddToggle("BypassDupe",           { Text = "Bypass Dupe",             Default = false, Tooltip = "Prevents you from open 'Dupe' fake doors." })
 Groupboxes.Exploits_Bypass:AddToggle("BypassEyes",           { Text = "Bypass Eyes",             Default = false, Tooltip = "Prevents 'Eyes' from hurting you." })
@@ -1265,7 +1268,7 @@ Toggles.BypassJeff:OnChanged(function(Value)
 	end
 end)
 
-Groupboxes.Exploits_BypassRight = Tabs.Exploits:AddRightGroupbox("Bypass")
+Groupboxes.Exploits_BypassRight = Tabs.Exploits:AddRightGroupbox("Bypass", "shield")
 Groupboxes.Exploits_BypassRight:AddToggle("DisableAnticheat", {
 	Text = "Anticheat Bypass", Default = false,
 	Tooltip = "Completely disables the anticheat, after interacting with a ladder."
@@ -1333,7 +1336,7 @@ Toggles.CrouchSpoof:OnChanged(function(Value)
 	end
 end)
 
-Groupboxes.Exploits_Remove = Tabs.Exploits:AddRightGroupbox("Remove")
+Groupboxes.Exploits_Remove = Tabs.Exploits:AddRightGroupbox("Remove", "trash-2")
 Groupboxes.Exploits_Remove:AddToggle("RemoveScreech", { Text = "Remove Screech",  Default = false, Tooltip = "Prevents 'Screech' from spawning." })
 Groupboxes.Exploits_Remove:AddToggle("RemoveHalt",    { Text = "Remove Halt",     Default = false, Tooltip = "Prevents 'Halt' from spawning." })
 Groupboxes.Exploits_Remove:AddToggle("RemoveA90",     { Text = "Remove A-90",     Default = false, Tooltip = "Prevents 'A-90' from spawning." })
@@ -1413,7 +1416,7 @@ Toggles.RemoveSurge:OnChanged(function(Value)
 	end
 end)
 
-Groupboxes.Exploits_Audio = Tabs.Exploits:AddLeftGroupbox("Audio")
+Groupboxes.Exploits_Audio = Tabs.Exploits:AddLeftGroupbox("Audio", "volume-2")
 Globals.JamMuffle = Services.SoundService:WaitForChild("Main"):FindFirstChild("Jamming") or Instance.new("EqualizerSoundEffect")
 
 Groupboxes.Exploits_Audio:AddToggle("RemoveFootstepSounds",    { Text = "Remove Footstep Sounds",    Default = false, Tooltip = "Removes the sounds when walking." })
@@ -1957,7 +1960,7 @@ Tabs.Floors:UpdateWarningBox({
 	Text = "Features highlighted in red do not work in the current floor.",
 })
 
-Groupboxes.Floors_Automation = Tabs.Floors:AddRightGroupbox("Automation")
+Groupboxes.Floors_Automation = Tabs.Floors:AddRightGroupbox("Automation", "bot")
 Groupboxes.Floors_Automation:AddToggle("AutoSteerMinecart", {
 	Text = "Auto Steer Minecart", Default = false, Tooltip = "Automatically completes the minecart chase.",
 	Disabled = not Functions.CheckCompatability({"require"}), DisabledTooltip = Globals.IncompatibleMessage
@@ -2219,7 +2222,7 @@ Connections.RoomsHandler = CurrentRooms.ChildAdded:Connect(function(Room)
 	end
 end)
 
-Groupboxes.Floors_Completion = Tabs.Floors:AddRightGroupbox("Completion")
+Groupboxes.Floors_Completion = Tabs.Floors:AddRightGroupbox("Completion", "flag")
 Groupboxes.Floors_Completion:AddButton({
     Text = "Auto Complete Dam Seek",
     Tooltip = "Automatically teleports to and interacts with each water pump.",
@@ -2296,7 +2299,7 @@ Groupboxes.Floors_Completion:AddButton({
     end
 })
 
-Groupboxes.Floors_Visuals = Tabs.Floors:AddLeftGroupbox("Visuals")
+Groupboxes.Floors_Visuals = Tabs.Floors:AddLeftGroupbox("Visuals", "eye")
 Groupboxes.Floors_Visuals:AddToggle("ShowSeekPathToggle", {
 	Text = "Show Seek Path", Default = false, Tooltip = "Shows you the correct path in seek chases.",
 	Risky = Floor ~= "Mines"
@@ -2324,7 +2327,7 @@ Toggles.ShowEyestalkPathToggle:AddColorPicker("ShowEyestalkPathColor", { Text = 
 Toggles.ShowEyestalkPathToggle:OnChanged(function(V) UpdateBeamVisibility(Objects.EyestalkHighlights, "ShowEyestalkPathColor", V) end)
 Options.ShowEyestalkPathColor:OnChanged(function(V)  UpdateBeamColor(Objects.EyestalkHighlights, V) end)
 
-Groupboxes.Floors_Bypass = Tabs.Floors:AddLeftGroupbox("Bypass")
+Groupboxes.Floors_Bypass = Tabs.Floors:AddLeftGroupbox("Bypass", "shield")
 Groupboxes.Floors_Bypass:AddToggle("RemoveSeekTrigger", {
 	Text = "Delete Seek Trigger", Default = false, Tooltip = "Diables the 'Seek' chase trigger.",
 	Risky = not (Floor == "Fools" or Floor == "OldHotel"),
@@ -2359,7 +2362,7 @@ for ObjName, ToggleName in ObstructionNames do
 	end)
 end
 
-Groupboxes.Floors_Farming = Tabs.Floors:AddLeftGroupbox("Farming")
+Groupboxes.Floors_Farming = Tabs.Floors:AddLeftGroupbox("Farming", "wheat")
 Groupboxes.Floors_Farming:AddToggle("KnobFarm", {
     Text = "Knob Farm",
     Default = false,

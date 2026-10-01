@@ -126,7 +126,7 @@ return function(Window)
 	end
 
 	local function WriteSaved(Selected)
-		if not (Environment.writefile and Environment.isfolder) then
+		if not Environment.writefile then
 			return
 		end
 		local List = {}

@@ -31,6 +31,10 @@ Interface.ThemeManager.BuiltInThemes = {
 		["Oceanic Next"]   = { 17, { FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46" } },
 		["Abyss Rose"]     = { 19, { FontColor = "ffeef4", MainColor = "1d1220", AccentColor = "ff5c8a", BackgroundColor = "140b17", OutlineColor = "372340" } },
 		["Abyss Ember"]    = { 20, { FontColor = "fff3e8", MainColor = "1c1512", AccentColor = "ff9a3d", BackgroundColor = "130d0a", OutlineColor = "382a22" } },
+		["Abyss Mint"]     = { 21, { FontColor = "e9fff5", MainColor = "0f1f1a", AccentColor = "3de8a8", BackgroundColor = "08130f", OutlineColor = "1f3a31" } },
+		["Abyss Violet"]   = { 22, { FontColor = "f1eaff", MainColor = "171227", AccentColor = "a46bff", BackgroundColor = "0e0a1a", OutlineColor = "2b2347" } },
+		["Abyss Mono"]     = { 23, { FontColor = "f2f2f2", MainColor = "1a1a1a", AccentColor = "d9d9d9", BackgroundColor = "101010", OutlineColor = "303030" } },
+		["AMOLED"]         = { 24, { FontColor = "ffffff", MainColor = "0a0a0a", AccentColor = "3ddcff", BackgroundColor = "000000", OutlineColor = "1c1c1c" } },
 		["Material"]       = { 18, { FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242" } },
 	}
 
