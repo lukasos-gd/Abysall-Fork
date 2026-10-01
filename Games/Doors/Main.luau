@@ -259,11 +259,6 @@ local function GetHiddenContainer()
 	return Services.CoreGui
 end
 
-local NotificationLibrary = {
-	LiveNotifications = 0,
-	Notifications = 1
-}
-
 local Container = Instance.new("ScreenGui")
 Container.Name = Abysall.ESPLibrary:GenerateRandomString()
 Container.Parent = GetHiddenContainer()
@@ -279,141 +274,11 @@ if not Library.Scheme then
 	})
 end
 
-function NotificationLibrary:Notify(TitleText, Desc, Delay)
-	task.spawn(function()
-		local Width = Library.IsMobile and 300 or 380
-		local Gap = 62
-		local Margin = 16
-		local Stroke = Instance.new("UIStroke")
-		local Notification = Instance.new("Frame")
-		local Line = Instance.new("Frame")
-		local Warning = Instance.new("ImageLabel")
-		local UICorner = Instance.new("UICorner")
-		local UICorner2 = Instance.new("UICorner")
-		local Title = Instance.new("TextLabel")
-		local Description = Instance.new("TextLabel")
-
-		Notification.Name = "Notification"
-		Notification.Parent = Container
-		Notification.BackgroundColor3 = Library.Scheme.BackgroundColor
-		Notification.BackgroundTransparency = 0.12
-		Notification.ClipsDescendants = true
-		Notification.BorderSizePixel = 0
-		Notification.Position = UDim2.new(1, 5, 0, 60 + (Gap * NotificationLibrary.LiveNotifications))
-		Notification.Size = UDim2.new(0, Width, 0, 54)
-		Stroke.Color = Library.Scheme.AccentColor
-		Stroke.Transparency = 0.65
-		Stroke.Thickness = 1
-		Stroke.Parent = Notification
-		Notification:SetAttribute("ID", NotificationLibrary.Notifications)
-		Notification:SetAttribute("CurrentPosition", Notification.Position)
-
-		Line.Name = "Line"
-		Line.Parent = Notification
-		Line.BackgroundColor3 = Library.Scheme.AccentColor
-		Line.BorderSizePixel = 0
-		Line.Position = UDim2.new(0, 0, 1, -2)
-		Line.Size = UDim2.new(0, 0, 0, 2)
-
-		Warning.Name = "Warning"
-		Warning.Parent = Notification
-		Warning.BackgroundTransparency = 1
-		Warning.Position = UDim2.new(0, 14, 0.5, -14)
-		Warning.Size = UDim2.new(0, 28, 0, 28)
-		Warning.Image = "rbxassetid://3944668821"
-		Warning.ImageColor3 = Library.Scheme.AccentColor
-		Warning.ScaleType = Enum.ScaleType.Fit
-
-		UICorner.CornerRadius = UDim.new(0, 14)
-		UICorner.Parent = Warning
-
-		UICorner2.CornerRadius = UDim.new(0, 10)
-		UICorner2.Parent = Notification
-
-		Title.Name = "Title"
-		Title.Parent = Notification
-		Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Title.BackgroundTransparency = 1
-		Title.Position = UDim2.new(0, 54, 0, 8)
-		Title.Size = UDim2.new(1, -66, 0, 18)
-		Title.Font = Enum.Font.GothamBold
-		Title.TextTruncate = Enum.TextTruncate.AtEnd
-		Title.Text = TitleText or "..."
-		Title.TextColor3 = Library.Scheme.FontColor
-		Title.TextSize = 13
-		Title.TextStrokeTransparency = 1
-		Title.TextXAlignment = Enum.TextXAlignment.Left
-
-		Description.Name = "Description"
-		Description.Parent = Notification
-		Description.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		Description.BackgroundTransparency = 1
-		Description.Position = UDim2.new(0, 54, 0, 27)
-		Description.Size = UDim2.new(1, -66, 0, 18)
-		Description.Font = Enum.Font.Gotham
-		Description.TextTruncate = Enum.TextTruncate.AtEnd
-		Description.Text = Desc or "..."
-		Description.TextColor3 = Library.Scheme.FontColor
-		Description.TextTransparency = 0.25
-		Description.TextSize = 12
-		Description.TextStrokeTransparency = 1
-		Description.TextXAlignment = Enum.TextXAlignment.Left
-
-		NotificationLibrary.LiveNotifications += 1
-		NotificationLibrary.Notifications += 1
-
-		Services.TweenService:Create(
-			Notification,
-			TweenInfo.new(1, Enum.EasingStyle.Exponential),
-			{ Position = UDim2.new(1, -(Width + Margin), 0, Notification.Position.Y.Offset) }
-		):Play()
-
-		task.wait(0.25)
-		if typeof(Delay) == "Instance" then
-			Delay.Destroying:Wait()
-		else
-			Services.TweenService:Create(
-				Line,
-				TweenInfo.new(Delay - 0.25, Enum.EasingStyle.Linear),
-				{ Size = UDim2.new(1, 0, 0, 2) }
-			):Play()
-			task.wait(Delay - 0.25)
-		end
-
-		Notification:SetAttribute("Destroying", true)
-
-		Services.TweenService:Create(
-			Notification,
-			TweenInfo.new(0.75, Enum.EasingStyle.Exponential, Enum.EasingDirection.In),
-			{ Position = UDim2.new(1, 5, 0, Notification.Position.Y.Offset) }
-		):Play()
-
-		NotificationLibrary.LiveNotifications -= 1
-
-		local NotifId = Notification:GetAttribute("ID")
-		local NotifY = Notification:GetAttribute("CurrentPosition").Y.Offset
-
-		for _, Object in Container:GetChildren() do
-			if Object.Name == "Notification"
-				and Object:GetAttribute("ID")
-				and Object:GetAttribute("ID") > NotifId
-				and Object:GetAttribute("Destroying") ~= true
-				and Object.Position.Y.Offset ~= 60
-			then
-				local NewY = Object:GetAttribute("CurrentPosition").Y.Offset - Gap
-				Object:SetAttribute("CurrentPosition", UDim2.new(1, -(Width + Margin), 0, NewY))
-				Services.TweenService:Create(
-					Object,
-					TweenInfo.new(1, Enum.EasingStyle.Exponential, Enum.EasingDirection.InOut),
-					{ Position = UDim2.new(1, -(Width + Margin), 0, NewY) }
-				):Play()
-			end
-		end
-
-		task.wait(0.75)
-		Notification:Destroy()
-	end)
-end
+local NotificationLibrary = Abysall.Load("Components/Notifications.luau")({
+	Services = Services,
+	Library = Library,
+	Container = Container
+})
 
 Globals.DoorsNotify = function(NotifyOptions)
 	local function PlaySound(Parent, SoundId, Volume)
@@ -482,6 +347,10 @@ end
 
 Globals.STX = Abysall.Load("Components/STX.luau")
 Functions.Notify = function(Settings)
+	if Toggles.MuteNotifications and Toggles.MuteNotifications.Value then
+		return
+	end
+
 	local HiddenContainer = GetHiddenContainer()
 
 	if not Settings.Body then
@@ -494,7 +363,7 @@ Functions.Notify = function(Settings)
 		Sound.Volume = (Toggles.NotifyPlaySound and Toggles.NotifyPlaySound.Value and Options.NotifySoundVolume.Value) or (Toggles.NotifyPlaySound and 0 or 3)
 		Sound.PlayOnRemove = true
 		Sound:Destroy()
-		NotificationLibrary:Notify(Settings.Title, Settings.Body, Settings.Time or 5)
+		NotificationLibrary:Notify(Settings.Title, Settings.Body, Settings.Time or 5, Settings.Kind)
 	elseif Options.NotifyStyle.Value == "Doors" then
 		local IsEntity = false
 		local EntityName = ""
@@ -4608,5 +4477,11 @@ Library:OnUnload(function()
 end)
 
 while not Globals.MainUI do task.wait() end
+local QuickSuccess, QuickError = pcall(function()
+	Abysall.Load("Components/QuickTab.luau")(Window)
+end)
+if not QuickSuccess then
+	warn("[Abysall Fork] Quick tab failed: " .. tostring(QuickError))
+end
 Abysall.Interface.ApplySettingsTab(Window)
 Functions.Notify({ Title = "Successfully loaded in " .. math.floor((tick() - LoadStart) * 1000) / 1000 .. " seconds." , Body = "Press '" .. tostring(Options.MenuKeybind.Value) .. "' to toggle the UI."})

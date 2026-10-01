@@ -37,6 +37,10 @@ return function(Window)
 			Library.ShowCustomCursor = Value
 		end,
 	})
+	MenuGroup:AddToggle("MuteNotifications", {
+		Text = "Mute Notifications",
+		Default = false,
+	})
 
 	MenuGroup:AddDropdown("UILibrary", {
 		Text = "UI Style",
@@ -101,7 +105,11 @@ return function(Window)
 	ThemeManager:SetLibrary(Library)
 	SaveManager:SetLibrary(Library)
 	SaveManager:IgnoreThemeSettings()
-	SaveManager:SetIgnoreIndexes({"UILibrary"})
+	local IgnoreIndexes = { "UILibrary", "FavoritePicker", "PresetPicker" }
+	for Slot = 1, 10 do
+		table.insert(IgnoreIndexes, "FavoriteSlot" .. Slot)
+	end
+	SaveManager:SetIgnoreIndexes(IgnoreIndexes)
 	ThemeManager:SetFolder("Abysall")
 	SaveManager:SetFolder("Abysall/" .. Abysall.SavePath)
 	SaveManager:BuildConfigSection(SettingsTab)
