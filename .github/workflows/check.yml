@@ -1,0 +1,26 @@
+name: Check
+on:
+  push:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Luau
+        run: |
+          curl -fsSL -o luau.zip https://github.com/luau-lang/luau/releases/latest/download/luau-ubuntu.zip
+          unzip -q luau.zip -d luau
+          chmod +x luau/luau-compile
+      - name: Compile every Luau file
+        run: |
+          fail=0
+          while IFS= read -r file; do
+            if ! ./luau/luau-compile --text "$file" > /dev/null; then
+              echo "FAILED: $file"
+              fail=1
+            fi
+          done < <(find . -name '*.luau' -not -path './.git/*' -not -path './luau/*')
+          exit $fail
+      - name: Validate Changelog.json
+        run: python3 -m json.tool Changelog.json > /dev/null

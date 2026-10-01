@@ -1,11 +1,36 @@
 return function(Window)
-    local LatestChangelog = {
-        "<font color='rgb(61, 220, 255)'><b>Fork update</b></font>",
-        "<font color='rgb(0, 255, 0)'>+ New Abyss theme (default)</font>",
-        "<font color='rgb(0, 255, 0)'>+ Rounded window and smoother fade</font>",
-        "<font color='rgb(0, 255, 0)'>+ Redesigned notifications, mobile sized</font>",
-        "<font color='rgb(0, 255, 0)'>+ Analytics removed</font>",
+    local Fallback = {
+        "<font color='rgb(61, 220, 255)'><b>Abysall Fork</b></font>",
+        "<font color='rgb(0, 255, 0)'>+ Could not load Changelog.json</font>"
     }
+
+    local Colors = {
+        add = { "rgb(0, 255, 0)", "+" },
+        fix = { "rgb(255, 222, 89)", "~" },
+        change = { "rgb(61, 220, 255)", "*" },
+        remove = { "rgb(255, 90, 100)", "-" }
+    }
+
+    local function BuildChangelog()
+        local Source = Abysall.Fetch and Abysall.Fetch("Changelog.json", 2)
+        if not Source then
+            return Fallback
+        end
+        local Success, Data = pcall(game:GetService("HttpService").JSONDecode, game:GetService("HttpService"), Source)
+        if not Success or type(Data) ~= "table" or type(Data.entries) ~= "table" then
+            return Fallback
+        end
+        local Lines = {
+            "<font color='rgb(61, 220, 255)'><b>v" .. tostring(Data.version) .. "</b> (" .. tostring(Data.date) .. ")</font>"
+        }
+        for _, Entry in ipairs(Data.entries) do
+            local Style = Colors[Entry.type] or Colors.change
+            table.insert(Lines, "<font color='" .. Style[1] .. "'>" .. Style[2] .. " " .. tostring(Entry.text) .. "</font>")
+        end
+        return Lines
+    end
+
+    local LatestChangelog = BuildChangelog()
 
     local function CloneReference(Object)
         if Abysall and Abysall.Environment.cloneref then
@@ -66,8 +91,9 @@ return function(Window)
     end
 
     local Community = InfoTab:AddLeftGroupbox("Community")
-    Community:AddButton("Copy Discord Invite", function()
-	    toclipboard("https://dsc.gg/abysallhub")
-	    Library:Notify("Discord invite copied.")
+    Community:AddButton("Copy GitHub Link", function()
+	    toclipboard("https://github.com/lukasos-gd/Abysall-Fork")
+	    Library:Notify("GitHub link copied.")
     end)
+    Community:AddLabel("Version: " .. tostring(Abysall.Version) .. " (" .. tostring(Abysall.Ref) .. ")", true)
 end
