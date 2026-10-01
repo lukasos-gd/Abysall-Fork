@@ -37,7 +37,7 @@ task.wait(1)
 
 local Window = Library:CreateWindow({
     Title = "Abysall Fork",
-    Footer = "dsc.gg/abysallhub",
+    Footer = "github.com/lukasos-gd/Abysall-Fork",
     NotifySide = "Right",
     ShowCustomCursor = false,
     AutoShow = true,

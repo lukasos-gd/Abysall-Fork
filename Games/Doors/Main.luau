@@ -280,6 +280,10 @@ end
 
 function NotificationLibrary:Notify(TitleText, Desc, Delay)
 	task.spawn(function()
+		local Width = Library.IsMobile and 300 or 380
+		local Gap = 62
+		local Margin = 16
+		local Stroke = Instance.new("UIStroke")
 		local Notification = Instance.new("Frame")
 		local Line = Instance.new("Frame")
 		local Warning = Instance.new("ImageLabel")
@@ -291,10 +295,15 @@ function NotificationLibrary:Notify(TitleText, Desc, Delay)
 		Notification.Name = "Notification"
 		Notification.Parent = Container
 		Notification.BackgroundColor3 = Library.Scheme.BackgroundColor
-		Notification.BackgroundTransparency = 0.4
+		Notification.BackgroundTransparency = 0.12
+		Notification.ClipsDescendants = true
 		Notification.BorderSizePixel = 0
-		Notification.Position = UDim2.new(1, 5, 0, 60 + (60 * NotificationLibrary.LiveNotifications))
-		Notification.Size = UDim2.new(0, 420, 0, 50)
+		Notification.Position = UDim2.new(1, 5, 0, 60 + (Gap * NotificationLibrary.LiveNotifications))
+		Notification.Size = UDim2.new(0, Width, 0, 54)
+		Stroke.Color = Library.Scheme.AccentColor
+		Stroke.Transparency = 0.65
+		Stroke.Thickness = 1
+		Stroke.Parent = Notification
 		Notification:SetAttribute("ID", NotificationLibrary.Notifications)
 		Notification:SetAttribute("CurrentPosition", Notification.Position)
 
@@ -302,47 +311,51 @@ function NotificationLibrary:Notify(TitleText, Desc, Delay)
 		Line.Parent = Notification
 		Line.BackgroundColor3 = Library.Scheme.AccentColor
 		Line.BorderSizePixel = 0
-		Line.Position = UDim2.new(0, 0, 1, -3)
-		Line.Size = UDim2.new(0, 0, 0, 3)
+		Line.Position = UDim2.new(0, 0, 1, -2)
+		Line.Size = UDim2.new(0, 0, 0, 2)
 
 		Warning.Name = "Warning"
 		Warning.Parent = Notification
 		Warning.BackgroundTransparency = 1
-		Warning.Position = UDim2.new(0, 10, 0, 5)
-		Warning.Size = UDim2.new(0, 40, 0, 40)
+		Warning.Position = UDim2.new(0, 14, 0.5, -14)
+		Warning.Size = UDim2.new(0, 28, 0, 28)
 		Warning.Image = "rbxassetid://3944668821"
 		Warning.ImageColor3 = Library.Scheme.AccentColor
 		Warning.ScaleType = Enum.ScaleType.Fit
 
-		UICorner.CornerRadius = UDim.new(0, 20)
+		UICorner.CornerRadius = UDim.new(0, 14)
 		UICorner.Parent = Warning
 
-		UICorner2.CornerRadius = UDim.new(0, 4)
+		UICorner2.CornerRadius = UDim.new(0, 10)
 		UICorner2.Parent = Notification
 
 		Title.Name = "Title"
 		Title.Parent = Notification
 		Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		Title.BackgroundTransparency = 1
-		Title.Position = UDim2.new(0, 60, 0.155, 0)
-		Title.Size = UDim2.new(0, 205, 0, 15)
+		Title.Position = UDim2.new(0, 54, 0, 8)
+		Title.Size = UDim2.new(1, -66, 0, 18)
+		Title.Font = Enum.Font.GothamBold
+		Title.TextTruncate = Enum.TextTruncate.AtEnd
 		Title.Text = TitleText or "..."
 		Title.TextColor3 = Library.Scheme.FontColor
-		Title.TextSize = 10
-		Title.TextStrokeTransparency = 0.75
+		Title.TextSize = 13
+		Title.TextStrokeTransparency = 1
 		Title.TextXAlignment = Enum.TextXAlignment.Left
 
 		Description.Name = "Description"
 		Description.Parent = Notification
 		Description.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		Description.BackgroundTransparency = 1
-		Description.Position = UDim2.new(0, 60, 0.483, 0)
-		Description.Size = UDim2.new(0, 205, 0, 18)
+		Description.Position = UDim2.new(0, 54, 0, 27)
+		Description.Size = UDim2.new(1, -66, 0, 18)
+		Description.Font = Enum.Font.Gotham
+		Description.TextTruncate = Enum.TextTruncate.AtEnd
 		Description.Text = Desc or "..."
 		Description.TextColor3 = Library.Scheme.FontColor
-		Description.TextTransparency = 0.1
-		Description.TextSize = 10
-		Description.TextStrokeTransparency = 0.75
+		Description.TextTransparency = 0.25
+		Description.TextSize = 12
+		Description.TextStrokeTransparency = 1
 		Description.TextXAlignment = Enum.TextXAlignment.Left
 
 		NotificationLibrary.LiveNotifications += 1
@@ -351,7 +364,7 @@ function NotificationLibrary:Notify(TitleText, Desc, Delay)
 		Services.TweenService:Create(
 			Notification,
 			TweenInfo.new(1, Enum.EasingStyle.Exponential),
-			{ Position = UDim2.new(1, -370, 0, Notification.Position.Y.Offset) }
+			{ Position = UDim2.new(1, -(Width + Margin), 0, Notification.Position.Y.Offset) }
 		):Play()
 
 		task.wait(0.25)
@@ -361,7 +374,7 @@ function NotificationLibrary:Notify(TitleText, Desc, Delay)
 			Services.TweenService:Create(
 				Line,
 				TweenInfo.new(Delay - 0.25, Enum.EasingStyle.Linear),
-				{ Size = UDim2.new(0, 400, 0, 3) }
+				{ Size = UDim2.new(1, 0, 0, 2) }
 			):Play()
 			task.wait(Delay - 0.25)
 		end
@@ -386,12 +399,12 @@ function NotificationLibrary:Notify(TitleText, Desc, Delay)
 				and Object:GetAttribute("Destroying") ~= true
 				and Object.Position.Y.Offset ~= 60
 			then
-				local NewY = Object:GetAttribute("CurrentPosition").Y.Offset - 60
-				Object:SetAttribute("CurrentPosition", UDim2.new(1, -450, 0, NewY))
+				local NewY = Object:GetAttribute("CurrentPosition").Y.Offset - Gap
+				Object:SetAttribute("CurrentPosition", UDim2.new(1, -(Width + Margin), 0, NewY))
 				Services.TweenService:Create(
 					Object,
 					TweenInfo.new(1, Enum.EasingStyle.Exponential, Enum.EasingDirection.InOut),
-					{ Position = UDim2.new(1, -370, 0, NewY) }
+					{ Position = UDim2.new(1, -(Width + Margin), 0, NewY) }
 				):Play()
 			end
 		end
@@ -1013,14 +1026,14 @@ end
 
 local Window = Library:CreateWindow({
 	Title = "Abysall Fork",
-	Footer = "dsc.gg/abysallhub",
+	Footer = "github.com/lukasos-gd/Abysall-Fork",
 	NotifySide = "Right",
 	ShowCustomCursor = false,
 	AutoShow = true,
 	Center = true,
-	TabPadding = 3,
-	MenuFadeTime = 0,
-	CornerRadius = 2,
+	TabPadding = 4,
+	MenuFadeTime = 0.15,
+	CornerRadius = 8,
 })
 
 Abysall.Interface.ApplyInfoTab(Window)

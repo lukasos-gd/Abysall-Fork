@@ -13,7 +13,7 @@ local Interface = {
 }
 
 Interface.ThemeManager.BuiltInThemes = {
-		["Default"]        = { 1,  { FontColor = "ffffff", MainColor = "1c1c1c", AccentColor = "0055ff", BackgroundColor = "141414", OutlineColor = "323232" } },
+		["Default"]        = { 1,  { FontColor = "e8f1ff", MainColor = "111a2b", AccentColor = "3ddcff", BackgroundColor = "0b1220", OutlineColor = "223149" } },
 		["BBot"]           = { 2,  { FontColor = "ffffff", MainColor = "1e1e1e", AccentColor = "7e48a3", BackgroundColor = "232323", OutlineColor = "141414" } },
 		["Fatality"]       = { 3,  { FontColor = "ffffff", MainColor = "1e1842", AccentColor = "c50754", BackgroundColor = "191335", OutlineColor = "3c355d" } },
 		["Jester"]         = { 4,  { FontColor = "ffffff", MainColor = "242424", AccentColor = "db4467", BackgroundColor = "1c1c1c", OutlineColor = "373737" } },
@@ -30,6 +30,8 @@ Interface.ThemeManager.BuiltInThemes = {
 		["One Dark"]       = { 15, { FontColor = "abb2bf", MainColor = "282c34", AccentColor = "c678dd", BackgroundColor = "21252b", OutlineColor = "5c6370" } },
 		["Cyberpunk"]      = { 16, { FontColor = "f9f9f9", MainColor = "262335", AccentColor = "00ff9f", BackgroundColor = "1a1a2e", OutlineColor = "413c5e" } },
 		["Oceanic Next"]   = { 17, { FontColor = "d8dee9", MainColor = "1b2b34", AccentColor = "6699cc", BackgroundColor = "16232a", OutlineColor = "343d46" } },
+		["Abyss Rose"]     = { 19, { FontColor = "ffeef4", MainColor = "1d1220", AccentColor = "ff5c8a", BackgroundColor = "140b17", OutlineColor = "372340" } },
+		["Abyss Ember"]    = { 20, { FontColor = "fff3e8", MainColor = "1c1512", AccentColor = "ff9a3d", BackgroundColor = "130d0a", OutlineColor = "382a22" } },
 		["Material"]       = { 18, { FontColor = "eeffff", MainColor = "212121", AccentColor = "82aaff", BackgroundColor = "151515", OutlineColor = "424242" } },
 	}
 
