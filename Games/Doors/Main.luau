@@ -4480,6 +4480,15 @@ Library:OnUnload(function()
 end)
 
 while not Globals.MainUI do task.wait() end
+local ArchivesSuccess, ArchivesError = pcall(function()
+	Abysall.Load("Components/ArchivesESP.luau")({
+		Functions = Functions,
+		Groupbox = Groupboxes.Visuals_Entities
+	})
+end)
+if not ArchivesSuccess then
+	warn("[Abysall Fork] Archives ESP failed: " .. tostring(ArchivesError))
+end
 local QuickSuccess, QuickError = pcall(function()
 	Abysall.Load("Components/QuickTab.luau")(Window)
 end)

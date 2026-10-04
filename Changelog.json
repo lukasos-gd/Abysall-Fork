@@ -1,16 +1,50 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "date": "10/1/2026",
   "entries": [
-    { "type": "add", "text": "Abyss theme as the new default, plus Rose, Ember, Mint, Violet, Mono and AMOLED" },
-    { "type": "add", "text": "Loading splash screen with progress" },
-    { "type": "add", "text": "Quick tab: config presets and pinned favorite toggles" },
-    { "type": "add", "text": "Notification types with icons, and a mute toggle in Settings" },
-    { "type": "add", "text": "Groupbox icons and a smaller window on mobile" },
-    { "type": "add", "text": "Version pinning through getgenv().AbysallRef" },
-    { "type": "change", "text": "Rounded window, smoother fade, redesigned notifications" },
-    { "type": "change", "text": "Loader retries failed downloads and reports errors" },
-    { "type": "change", "text": "Notifications moved into their own module" },
-    { "type": "remove", "text": "Analytics" }
+    {
+      "type": "add",
+      "text": "Archives and Stairwell entity ESP and notifications (name-matched, with a debug print toggle)"
+    },
+    {
+      "type": "add",
+      "text": "Abyss theme as the new default, plus Rose, Ember, Mint, Violet, Mono and AMOLED"
+    },
+    {
+      "type": "add",
+      "text": "Loading splash screen with progress"
+    },
+    {
+      "type": "add",
+      "text": "Quick tab: config presets and pinned favorite toggles"
+    },
+    {
+      "type": "add",
+      "text": "Notification types with icons, and a mute toggle in Settings"
+    },
+    {
+      "type": "add",
+      "text": "Groupbox icons and a smaller window on mobile"
+    },
+    {
+      "type": "add",
+      "text": "Version pinning through getgenv().AbysallRef"
+    },
+    {
+      "type": "change",
+      "text": "Rounded window, smoother fade, redesigned notifications"
+    },
+    {
+      "type": "change",
+      "text": "Loader retries failed downloads and reports errors"
+    },
+    {
+      "type": "change",
+      "text": "Notifications moved into their own module"
+    },
+    {
+      "type": "remove",
+      "text": "Analytics"
+    }
   ]
 }
