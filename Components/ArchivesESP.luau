@@ -6,22 +6,22 @@ return function(Env)
 	local Options = Library.Options
 
 	local Known = {
-		{ Label = "Honcho", Pattern = "honcho" },
-		{ Label = "Drone", Pattern = "drone" },
-		{ Label = "Forget-Me-Not", Pattern = "forgetmenot" },
-		{ Label = "Teller", Pattern = "teller" },
-		{ Label = "Alma", Pattern = "alma" },
-		{ Label = "Bash", Pattern = "bash" },
-		{ Label = "Ransom", Pattern = "ransom" },
-		{ Label = "Scribbles", Pattern = "scribbles" },
-		{ Label = "Portrait", Pattern = "portrait" },
-		{ Label = "Fih", Pattern = "fih" },
-		{ Label = "Creak", Pattern = "creak" },
-		{ Label = "Noise", Pattern = "noise" },
-		{ Label = "Stem", Pattern = "stem" },
-		{ Label = "Cobbler", Pattern = "cobbler" },
-		{ Label = "Hijack", Pattern = "hijack" },
-		{ Label = "Meld", Pattern = "meld" }
+		{ Label = "Honcho", Patterns = { "honcho", "boss" } },
+		{ Label = "Drone", Patterns = { "drone", "dronerig" } },
+		{ Label = "Forget-Me-Not", Patterns = { "forgetmenot", "forgetme", "fmn" } },
+		{ Label = "Teller", Patterns = { "teller", "ticketmachine" } },
+		{ Label = "Alma", Patterns = { "alma" } },
+		{ Label = "Bash", Patterns = { "bash", "a60" } },
+		{ Label = "Ransom", Patterns = { "ransom", "a90" } },
+		{ Label = "Scribbles", Patterns = { "scribbles", "scribble", "a120" } },
+		{ Label = "Portrait", Patterns = { "portrait" } },
+		{ Label = "Fih", Patterns = { "fih", "fish" } },
+		{ Label = "Creak", Patterns = { "creak" } },
+		{ Label = "Noise", Patterns = { "noise" } },
+		{ Label = "Stem", Patterns = { "stem" } },
+		{ Label = "Cobbler", Patterns = { "cobbler", "shoe" } },
+		{ Label = "Hijack", Patterns = { "hijack" } },
+		{ Label = "Meld", Patterns = { "meld" } }
 	}
 
 	local Labels = {}
@@ -45,30 +45,45 @@ return function(Env)
 		Tooltip = "Sends a notification when one of these entities appears."
 	})
 	Groupbox:AddToggle("ArchivesDebugToggle", {
-		Text = "Print Matched Names",
+		Text = "Log Model Names",
 		Default = false,
-		Tooltip = "Prints the in-game name of every match to the console."
+		Tooltip = "Prints every new model name to the console, marked MATCH or MISS."
+	})
+	Groupbox:AddToggle("ArchivesDiscoveryToggle", {
+		Text = "Label All New Models",
+		Default = false,
+		Tooltip = "Highlights every new top-level model with its real name, to find entity names without the console."
 	})
 	Groupbox:AddDropdown("ArchivesESPOptions", {
 		Text = "Archives / Stairwell Entities",
 		Values = Labels,
-		Default = Defaults,
 		Multi = true,
-		Searchable = true
+		AllowNull = true
 	})
+
+	pcall(function()
+		Options.ArchivesESPOptions:SetValue(Defaults)
+	end)
 
 	local Tracked = {}
 	local Connections = {}
 
+	local Seen = {}
+
 	local function Normalize(Name)
-		return (string.lower(Name):gsub("[^%a]", ""))
+		return (string.lower(Name):gsub("[^%w]", ""))
 	end
 
 	local function Match(Name)
 		local Clean = Normalize(Name)
 		for _, Entry in ipairs(Known) do
-			if string.sub(Clean, 1, #Entry.Pattern) == Entry.Pattern then
-				return Entry.Label
+			for _, Pattern in ipairs(Entry.Patterns) do
+				if string.sub(Clean, 1, #Pattern) == Pattern then
+					return Entry.Label
+				end
+				if #Pattern >= 6 and string.find(Clean, Pattern, 1, true) then
+					return Entry.Label
+				end
 			end
 		end
 	end
@@ -85,15 +100,16 @@ return function(Env)
 			return
 		end
 		local Label = Match(Object.Name)
+		if Toggles.ArchivesDebugToggle.Value and not Seen[Object.Name] then
+			Seen[Object.Name] = true
+			print("[Abysall Fork]", Label and "MATCH" or "MISS", Object.Name, "|", Object:GetFullName())
+		end
 		if not Label then
 			return
 		end
 		local Enabled = Options.ArchivesESPOptions.Value
 		if type(Enabled) ~= "table" or not Enabled[Label] then
 			return
-		end
-		if Toggles.ArchivesDebugToggle.Value then
-			print("[Abysall Fork] match", Label, "|", Object:GetFullName())
 		end
 		if Toggles.ArchivesESPToggle.Value then
 			Tracked[Object] = Label
@@ -136,7 +152,28 @@ return function(Env)
 		end
 	end
 
-	table.insert(Connections, workspace.ChildAdded:Connect(Consider))
+	local Discovered = {}
+	local PlayersService = game:GetService("Players")
+
+	table.insert(Connections, workspace.ChildAdded:Connect(function(Child)
+		Consider(Child)
+		if not Toggles.ArchivesDiscoveryToggle.Value then
+			return
+		end
+		if not Child:IsA("Model") or Child.Name == "CurrentRooms" or PlayersService:GetPlayerFromCharacter(Child) then
+			return
+		end
+		Discovered[Child] = true
+		pcall(Functions.AddESP, {
+			Object = Child,
+			Text = Child.Name,
+			Color = Color3.fromRGB(255, 255, 255)
+		})
+		Child.Destroying:Once(function()
+			Discovered[Child] = nil
+			pcall(Functions.RemoveESP, Child)
+		end)
+	end))
 
 	local function HookRooms(Rooms)
 		table.insert(Connections, Rooms.DescendantAdded:Connect(function(Descendant)
@@ -162,6 +199,15 @@ return function(Env)
 			Scan()
 		else
 			ClearAll()
+		end
+	end)
+
+	Toggles.ArchivesDiscoveryToggle:OnChanged(function(Value)
+		if not Value then
+			for Object in pairs(Discovered) do
+				Discovered[Object] = nil
+				pcall(Functions.RemoveESP, Object)
+			end
 		end
 	end)
 
