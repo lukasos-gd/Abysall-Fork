@@ -4,46 +4,17 @@ return function(Env)
 	local Library = Abysall.Interface.Library
 	local Toggles = Library.Toggles
 	local Options = Library.Options
+	local PlayersService = game:GetService("Players")
 
 	local Known = {
-		{ Label = "Honcho", Patterns = { "honcho", "boss" } },
-		{ Label = "Drone", Patterns = { "drone", "dronerig" } },
-		{ Label = "Forget-Me-Not", Patterns = { "forgetmenot", "forgetme", "fmn" } },
-		{ Label = "Teller", Patterns = { "teller", "ticketmachine" } },
-		{ Label = "Alma", Patterns = { "alma" } },
-		{ Label = "Bash", Patterns = { "bash", "a60" } },
-		{ Label = "Ransom", Patterns = { "ransom", "a90" } },
-		{ Label = "Scribbles", Patterns = { "scribbles", "scribble", "a120" } },
-		{ Label = "Portrait", Patterns = { "portrait" } },
-		{ Label = "Fih", Patterns = { "fih", "fish" } },
-		{ Label = "Creak", Patterns = { "creak" } },
-		{ Label = "Noise", Patterns = { "noise" } },
-		{ Label = "Stem", Patterns = { "stem" } },
-		{ Label = "Cobbler", Patterns = { "cobbler", "shoe" } },
-		{ Label = "Hijack", Patterns = { "hijack" } },
-		{ Label = "Meld", Patterns = { "meld" } }
+		{ Label = "Drones Stampede", Name = "dronesstampede", Body = "A stampede of Drones is coming." },
+		{ Label = "Drones", Name = "drones", Body = "Passive until you get close." },
+		{ Label = "Teller", Name = "tellerentity", Body = "Blocks a door until you have the right ticket." },
+		{ Label = "Bash", Name = "bashmoving", Body = "Stay alert." },
+		{ Label = "Scribbles", Name = "scribbles", Body = "Stay alert." }
 	}
 
-	local Labels = {}
-	local Defaults = {}
-	for _, Entry in ipairs(Known) do
-		table.insert(Labels, Entry.Label)
-		if Entry.Label ~= "Fih" then
-			Defaults[Entry.Label] = true
-		end
-	end
-
 	Groupbox:AddDivider()
-	Groupbox:AddToggle("ArchivesESPToggle", {
-		Text = "Archives / Stairwell ESP",
-		Default = false,
-		Tooltip = "Highlights entities from The Archives and The Stairwell."
-	})
-	Groupbox:AddToggle("ArchivesNotifyToggle", {
-		Text = "Archives / Stairwell Notify",
-		Default = false,
-		Tooltip = "Sends a notification when one of these entities appears."
-	})
 	Groupbox:AddToggle("ArchivesDebugToggle", {
 		Text = "Log Model Names",
 		Default = false,
@@ -52,115 +23,106 @@ return function(Env)
 	Groupbox:AddToggle("ArchivesDiscoveryToggle", {
 		Text = "Label All New Models",
 		Default = false,
-		Tooltip = "Highlights every new top-level model with its real name, to find entity names without the console."
-	})
-	Groupbox:AddDropdown("ArchivesESPOptions", {
-		Text = "Archives / Stairwell Entities",
-		Values = Labels,
-		Multi = true,
-		AllowNull = true
+		Tooltip = "Highlights every new top-level model with its real name."
 	})
 
-	pcall(function()
-		Options.ArchivesESPOptions:SetValue(Defaults)
-	end)
-
-	local Tracked = {}
+	local Alive = {}
+	local Notified = {}
+	local Shown = {}
+	local Discovered = {}
 	local Connections = {}
-
 	local Seen = {}
 
-	local function Normalize(Name)
-		return (string.lower(Name):gsub("[^%w]", ""))
-	end
-
 	local function Match(Name)
-		local Clean = Normalize(Name)
+		local Clean = string.lower(Name)
 		for _, Entry in ipairs(Known) do
-			for _, Pattern in ipairs(Entry.Patterns) do
-				if string.sub(Clean, 1, #Pattern) == Pattern then
-					return Entry.Label
-				end
-				if #Pattern >= 6 and string.find(Clean, Pattern, 1, true) then
-					return Entry.Label
-				end
+			if Clean == Entry.Name then
+				return Entry
 			end
 		end
 	end
 
-	local function Remove(Object)
-		if Tracked[Object] then
-			Tracked[Object] = nil
-			pcall(Functions.RemoveESP, Object)
+	local function ShouldShow(Label)
+		if not Toggles.EntityESPToggle.Value then
+			return false
 		end
+		local Selected = Options.EntityESPOptions.Value
+		return type(Selected) == "table" and Selected[Label] == true
 	end
 
-	local function Consider(Object)
-		if Tracked[Object] or not Object:IsA("Model") then
-			return
+	local function ShouldNotify(Label)
+		if not Toggles.NotifyEntities.Value then
+			return false
 		end
-		local Label = Match(Object.Name)
-		if Toggles.ArchivesDebugToggle.Value and not Seen[Object.Name] then
-			Seen[Object.Name] = true
-			print("[Abysall Fork]", Label and "MATCH" or "MISS", Object.Name, "|", Object:GetFullName())
-		end
+		local Selected = Options.EntityList.Value
+		return type(Selected) == "table" and Selected[Label] == true
+	end
+
+	local function Refresh(Object)
+		local Label = Alive[Object]
 		if not Label then
 			return
 		end
-		local Enabled = Options.ArchivesESPOptions.Value
-		if type(Enabled) ~= "table" or not Enabled[Label] then
-			return
-		end
-		if Toggles.ArchivesESPToggle.Value then
-			Tracked[Object] = Label
+		if ShouldShow(Label) then
+			Shown[Object] = true
 			pcall(Functions.AddESP, {
 				Object = Object,
 				Text = Label,
 				Color = Options.EntityESPColor.Value
 			})
+		elseif Shown[Object] then
+			Shown[Object] = nil
+			pcall(Functions.RemoveESP, Object)
 		end
-		if Toggles.ArchivesNotifyToggle.Value then
+	end
+
+	local function RefreshAll()
+		for Object in pairs(Alive) do
+			Refresh(Object)
+		end
+	end
+
+	local function Consider(Object)
+		if Alive[Object] then
+			return
+		end
+		if not (Object:IsA("Model") or Object:IsA("BasePart")) then
+			return
+		end
+		local Entry = Match(Object.Name)
+		if Toggles.ArchivesDebugToggle.Value and not Seen[Object] then
+			Seen[Object] = true
+			print("[Abysall Fork]", Entry and "MATCH" or "MISS", Object.ClassName, Object.Name, "|", Object:GetFullName())
+		end
+		if not Entry then
+			return
+		end
+		Alive[Object] = Entry.Label
+		Refresh(Object)
+		if not Notified[Object] and ShouldNotify(Entry.Label) then
+			Notified[Object] = true
 			Functions.Notify({
-				Title = Label .. " appeared",
-				Body = "Archives / Stairwell entity nearby.",
-				Time = 5,
-				Kind = "warning"
+				Title = "Entity '" .. Entry.Label .. "' has spawned.",
+				Body = Entry.Body,
+				Kind = "warning",
+				Time = Toggles.NotifyKeepNotifications and Toggles.NotifyKeepNotifications.Value and Object or 5
 			})
 		end
 		Object.Destroying:Once(function()
-			Remove(Object)
+			Alive[Object] = nil
+			Notified[Object] = nil
+			if Shown[Object] then
+				Shown[Object] = nil
+				pcall(Functions.RemoveESP, Object)
+			end
 		end)
 	end
 
-	local function ClearAll()
-		for Object in pairs(Tracked) do
-			Remove(Object)
-		end
-	end
-
-	local function Scan()
-		for _, Child in ipairs(workspace:GetChildren()) do
-			Consider(Child)
-		end
-		local Rooms = workspace:FindFirstChild("CurrentRooms")
-		if Rooms then
-			for _, Descendant in ipairs(Rooms:GetDescendants()) do
-				if Descendant:IsA("Model") then
-					Consider(Descendant)
-				end
-			end
-		end
-	end
-
-	local Discovered = {}
-	local PlayersService = game:GetService("Players")
-
-	table.insert(Connections, workspace.ChildAdded:Connect(function(Child)
-		Consider(Child)
+	local function Discover(Child)
 		if not Toggles.ArchivesDiscoveryToggle.Value then
 			return
 		end
-		if not Child:IsA("Model") or Child.Name == "CurrentRooms" or PlayersService:GetPlayerFromCharacter(Child) then
+		if not Child:IsA("Model") or PlayersService:GetPlayerFromCharacter(Child) then
 			return
 		end
 		Discovered[Child] = true
@@ -173,33 +135,44 @@ return function(Env)
 			Discovered[Child] = nil
 			pcall(Functions.RemoveESP, Child)
 		end)
+	end
+
+	local function WatchLive(Live)
+		for _, Child in ipairs(Live:GetChildren()) do
+			Consider(Child)
+		end
+		table.insert(Connections, Live.ChildAdded:Connect(function(Child)
+			Consider(Child)
+			Discover(Child)
+		end))
+	end
+
+	for _, Child in ipairs(workspace:GetChildren()) do
+		Consider(Child)
+	end
+
+	table.insert(Connections, workspace.ChildAdded:Connect(function(Child)
+		if Child.Name == "LiveEntities" then
+			WatchLive(Child)
+			return
+		end
+		Consider(Child)
+		Discover(Child)
 	end))
 
-	local function HookRooms(Rooms)
-		table.insert(Connections, Rooms.DescendantAdded:Connect(function(Descendant)
-			if Descendant:IsA("Model") then
-				Consider(Descendant)
-			end
-		end))
+	local Live = workspace:FindFirstChild("LiveEntities")
+	if Live then
+		WatchLive(Live)
 	end
 
-	local Rooms = workspace:FindFirstChild("CurrentRooms")
-	if Rooms then
-		HookRooms(Rooms)
-	else
-		table.insert(Connections, workspace.ChildAdded:Connect(function(Child)
-			if Child.Name == "CurrentRooms" then
-				HookRooms(Child)
-			end
-		end))
-	end
-
-	Toggles.ArchivesESPToggle:OnChanged(function(Value)
-		if Value then
-			Scan()
-		else
-			ClearAll()
+	Toggles.EntityESPToggle:OnChanged(RefreshAll)
+	Options.EntityESPOptions:OnChanged(RefreshAll)
+	Options.EntityESPColor:OnChanged(function()
+		for Object in pairs(Shown) do
+			Shown[Object] = nil
+			pcall(Functions.RemoveESP, Object)
 		end
+		RefreshAll()
 	end)
 
 	Toggles.ArchivesDiscoveryToggle:OnChanged(function(Value)
@@ -211,20 +184,13 @@ return function(Env)
 		end
 	end)
 
-	Options.ArchivesESPOptions:OnChanged(function()
-		ClearAll()
-		Scan()
-	end)
-
-	Options.EntityESPColor:OnChanged(function()
-		if Toggles.ArchivesESPToggle.Value then
-			ClearAll()
-			Scan()
-		end
-	end)
-
 	Abysall.Cleanup:Add(function()
-		ClearAll()
+		for Object in pairs(Shown) do
+			pcall(Functions.RemoveESP, Object)
+		end
+		for Object in pairs(Discovered) do
+			pcall(Functions.RemoveESP, Object)
+		end
 		for _, Connection in ipairs(Connections) do
 			Connection:Disconnect()
 		end

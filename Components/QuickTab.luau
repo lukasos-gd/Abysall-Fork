@@ -13,15 +13,15 @@ return function(Window)
 	local Presets = {
 		["Legit"] = {
 			"NotifyEntities", "NotifyItemsToggle", "NotifyLibraryCode", "NotifyOxygen",
-			"ObjectiveESPToggle", "DoorESPToggle", "ItemESPToggle", "CurrencyESPToggle", "EntityESPToggle", "ArchivesESPToggle"
+			"ObjectiveESPToggle", "DoorESPToggle", "ItemESPToggle", "CurrencyESPToggle", "EntityESPToggle"
 		},
 		["Visuals only"] = {
 			"ObjectiveESPToggle", "DoorESPToggle", "HidingSpotESPToggle", "PlayerESPToggle",
 			"ChestESPToggle", "ItemESPToggle", "CurrencyESPToggle", "LadderESPToggle",
-			"EntityESPToggle", "ArchivesESPToggle", "ESPShowDistance", "AmbientToggle"
+			"EntityESPToggle", "ESPShowDistance", "AmbientToggle"
 		},
 		["Notifiers only"] = {
-			"NotifyEntities", "ArchivesNotifyToggle", "NotifyItemsToggle", "NotifyLibraryCode", "NotifyOxygen",
+			"NotifyEntities", "NotifyItemsToggle", "NotifyLibraryCode", "NotifyOxygen",
 			"NotifyHasteTime", "NotifyPlaySound"
 		},
 		["Quality of life"] = {
