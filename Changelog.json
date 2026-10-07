@@ -1,7 +1,11 @@
 {
-  "version": "1.3.1",
+  "version": "1.3.2",
   "date": "10/1/2026",
   "entries": [
+    {
+      "type": "fix",
+      "text": "Teller ESP now targets TellerRig; Drones/Stampede/Bash hitbox parts set explicitly; Ransom notify; Drones notify rate-limited"
+    },
     {
       "type": "fix",
       "text": "New entities now show their hitbox in the ESP like the older ones (toggle: Show Hitbox on New Entities)"

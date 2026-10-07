@@ -9,13 +9,15 @@ return function(Env)
 	local CollectionService = game:GetService("CollectionService")
 
 	local Known = {
-		{ Label = "Drones Stampede", Name = "dronesstampede", Body = "A stampede of Drones is coming." },
-		{ Label = "Drones", Name = "drones", Body = "Passive until you get close." },
-		{ Label = "Teller", Name = "tellerentity", Body = "Blocks a door until you have the right ticket." },
-		{ Label = "Bash", Name = "bashmoving", Body = "Stay alert." },
+		{ Label = "Drones Stampede", Name = "dronesstampede", Body = "A stampede of Drones is coming.", Hitbox = { "Main", "Segment1", "Segment2", "Segment3" } },
+		{ Label = "Drones", Name = "drones", Body = "Passive until you get close.", Hitbox = { "Root" } },
+		{ Label = "Teller", Name = "tellerentity", Body = "Blocks a door until you have the right ticket.", NoESP = true },
+		{ Label = "Teller", Name = "tellerrig", NoNotify = true },
+		{ Label = "Bash", Name = "bashmoving", Body = "Stay alert.", Hitbox = { "Main" } },
 		{ Label = "Scribbles", Name = "scribbles", Body = "Stay alert." },
 		{ Label = "Alma", Name = "alma", Body = "Stay alert." },
 		{ Label = "Creak", Name = "creak", Body = "Stay alert." },
+		{ Label = "Ransom", Name = "ransom", Body = "Stay alert.", NoESP = true },
 		{ Label = "Bramble", Name = "liveentitybramble", Body = "Stay alert.", NoESP = true }
 	}
 
@@ -43,6 +45,7 @@ return function(Env)
 
 	local Alive = {}
 	local Notified = {}
+	local LastNotify = {}
 	local Shown = {}
 	local Discovered = {}
 	local Connections = {}
@@ -60,7 +63,7 @@ return function(Env)
 	local Originals = {}
 	local HitboxWatchers = {}
 
-	local function HitboxParts(Object)
+	local function HitboxParts(Object, Entry)
 		local Parts = {}
 		if Object:IsA("BasePart") then
 			table.insert(Parts, Object)
@@ -68,6 +71,17 @@ return function(Env)
 		for _, Descendant in ipairs(Object:GetDescendants()) do
 			if Descendant:IsA("BasePart") then
 				table.insert(Parts, Descendant)
+			end
+		end
+		if Entry and Entry.Hitbox then
+			local Listed = {}
+			for _, Part in ipairs(Parts) do
+				if table.find(Entry.Hitbox, Part.Name) then
+					table.insert(Listed, Part)
+				end
+			end
+			if #Listed > 0 then
+				return Listed
 			end
 		end
 		local Named = {}
@@ -96,7 +110,7 @@ return function(Env)
 
 	local function ApplyHitbox(Object)
 		Originals[Object] = Originals[Object] or {}
-		for _, Part in ipairs(HitboxParts(Object)) do
+		for _, Part in ipairs(HitboxParts(Object, Alive[Object])) do
 			if Part.Transparency >= 0.99 and not Originals[Object][Part] then
 				Originals[Object][Part] = { Part.Transparency, Part.Material }
 				Part.Transparency = 0.999
@@ -141,7 +155,7 @@ return function(Env)
 	end
 
 	local function ShouldNotify(Entry)
-		if Entry.Unlisted or not Toggles.NotifyEntities.Value then
+		if Entry.Unlisted or Entry.NoNotify or not Toggles.NotifyEntities.Value then
 			return false
 		end
 		local Selected = Options.EntityList.Value
@@ -183,12 +197,16 @@ return function(Env)
 		Refresh(Object)
 		if not Notified[Object] and ShouldNotify(Entry) then
 			Notified[Object] = true
-			Functions.Notify({
-				Title = "Entity '" .. Entry.Label .. "' has spawned.",
-				Body = Entry.Body,
-				Kind = "warning",
-				Time = Toggles.NotifyKeepNotifications and Toggles.NotifyKeepNotifications.Value and Object or 5
-			})
+			local Now = os.clock()
+			if not LastNotify[Entry.Label] or Now - LastNotify[Entry.Label] >= 8 then
+				LastNotify[Entry.Label] = Now
+				Functions.Notify({
+					Title = "Entity '" .. Entry.Label .. "' has spawned.",
+					Body = Entry.Body,
+					Kind = "warning",
+					Time = Toggles.NotifyKeepNotifications and Toggles.NotifyKeepNotifications.Value and Object or 5
+				})
+			end
 		end
 		Object.Destroying:Once(function()
 			Alive[Object] = nil
