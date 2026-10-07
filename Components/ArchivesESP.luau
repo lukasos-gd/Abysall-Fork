@@ -9,10 +9,10 @@ return function(Env)
 	local CollectionService = game:GetService("CollectionService")
 
 	local Known = {
-		{ Label = "Drones Stampede", Name = "dronesstampede", Body = "A stampede of Drones is coming.", Hitbox = { "Main", "Segment1", "Segment2", "Segment3" } },
-		{ Label = "Drones", Name = "drones", Body = "Passive until you get close.", Hitbox = { "Root" } },
+		{ Label = "Drones Stampede", Name = "dronesstampede", Body = "A stampede of Drones is coming.", Hitbox = { "Main", "Segment1", "Segment2", "Segment3" }, MaxDistance = 670 },
+		{ Label = "Drones", Name = "drones", Body = "Passive until you get close.", Hitbox = { "Root" }, MaxDistance = 670 },
 		{ Label = "Teller", Name = "tellerentity", Body = "Blocks a door until you have the right ticket.", NoESP = true },
-		{ Label = "Teller", Name = "tellerrig", NoNotify = true },
+		{ Label = "Teller", Name = "tellerrig", NoNotify = true, MaxDistance = 670 },
 		{ Label = "Bash", Name = "bashmoving", Body = "Stay alert.", Hitbox = { "Main" } },
 		{ Label = "Scribbles", Name = "scribbles", Body = "Stay alert." },
 		{ Label = "Alma", Name = "alma", Body = "Stay alert." },
@@ -162,23 +162,53 @@ return function(Env)
 		return type(Selected) == "table" and Selected[Entry.Label] == true
 	end
 
-	local function Refresh(Object)
+	local LocalPlayer = PlayersService.LocalPlayer
+
+	local function DistanceTo(Object)
+		local Character = LocalPlayer.Character
+		local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+		local Origin = Root and Root.Position or workspace.CurrentCamera.CFrame.Position
+		local Position
+		if Object:IsA("Model") then
+			Position = Object:GetPivot().Position
+		else
+			Position = Object.Position
+		end
+		return (Position - Origin).Magnitude
+	end
+
+	local function IsFar(Object, Entry)
+		if not Entry.MaxDistance then
+			return false
+		end
+		local Limit = Entry.MaxDistance
+		if not Shown[Object] then
+			Limit = Limit - 20
+		end
+		return DistanceTo(Object) > Limit
+	end
+
+	local function Refresh(Object, Force)
 		local Entry = Alive[Object]
 		if not Entry then
 			return
 		end
-		if ShouldShow(Entry) then
-			Shown[Object] = true
-			if Toggles.ArchivesHitboxToggle.Value then
-				pcall(ApplyHitbox, Object)
-			else
-				RestoreHitbox(Object)
+		if ShouldShow(Entry) and not IsFar(Object, Entry) then
+			if Force or not Shown[Object] then
+				if Toggles.ArchivesHitboxToggle.Value then
+					pcall(ApplyHitbox, Object)
+				else
+					RestoreHitbox(Object)
+				end
 			end
-			pcall(Functions.AddESP, {
-				Object = Object,
-				Text = Entry.Label,
-				Color = Options.EntityESPColor.Value
-			})
+			if not Shown[Object] then
+				Shown[Object] = true
+				pcall(Functions.AddESP, {
+					Object = Object,
+					Text = Entry.Label,
+					Color = Options.EntityESPColor.Value
+				})
+			end
 		elseif Shown[Object] then
 			Shown[Object] = nil
 			RestoreHitbox(Object)
@@ -188,7 +218,7 @@ return function(Env)
 
 	local function RefreshAll()
 		for Object in pairs(Alive) do
-			Refresh(Object)
+			Refresh(Object, true)
 		end
 	end
 
@@ -330,7 +360,20 @@ return function(Env)
 		end
 	end)
 
+	local Running = true
+	task.spawn(function()
+		while Running do
+			task.wait(0.5)
+			for Object, Entry in pairs(Alive) do
+				if Entry.MaxDistance then
+					pcall(Refresh, Object)
+				end
+			end
+		end
+	end)
+
 	Abysall.Cleanup:Add(function()
+		Running = false
 		for Object in pairs(Shown) do
 			RestoreHitbox(Object)
 			pcall(Functions.RemoveESP, Object)

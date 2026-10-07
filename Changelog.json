@@ -1,7 +1,19 @@
 {
-  "version": "1.4.0",
+  "version": "1.5.0",
   "date": "10/1/2026",
   "entries": [
+    {
+      "type": "add",
+      "text": "ESP and notifications for Archives items (any item the main list doesn't know), toggle: Archives Items"
+    },
+    {
+      "type": "change",
+      "text": "Drones, Teller, deposit machine and box ESP auto-remove beyond 670 studs"
+    },
+    {
+      "type": "change",
+      "text": "Window size and tab padding back to the original"
+    },
     {
       "type": "add",
       "text": "Honcho boss room: Objectives ESP now marks the correct boxes and their deposit machines"

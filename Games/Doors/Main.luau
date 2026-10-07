@@ -901,12 +901,11 @@ local Window = Library:CreateWindow({
 	ShowCustomCursor = false,
 	AutoShow = true,
 	Center = true,
-	TabPadding = 4,
+	TabPadding = 3,
 	MenuFadeTime = 0.15,
 	CornerRadius = 8,
 	DisableSearch = false,
 	MobileButtonsSide = "Left",
-	Size = Library.IsMobile and UDim2.fromOffset(500, 300) or UDim2.fromOffset(720, 600),
 })
 
 Abysall.Interface.ApplyInfoTab(Window)
@@ -4491,6 +4490,16 @@ local ArchivesSuccess, ArchivesError = pcall(function()
 end)
 if not ArchivesSuccess then
 	warn("[Abysall Fork] Archives ESP failed: " .. tostring(ArchivesError))
+end
+local ItemsSuccess, ItemsError = pcall(function()
+	Abysall.Load("Components/ArchivesItemsESP.luau")({
+		Functions = Functions,
+		Groupbox = Groupboxes.Visuals_ESP_Toggles,
+		ItemNames = ItemNames
+	})
+end)
+if not ItemsSuccess then
+	warn("[Abysall Fork] Archives items ESP failed: " .. tostring(ItemsError))
 end
 local BossSuccess, BossError = pcall(function()
 	Abysall.Load("Components/BossRoomESP.luau")({

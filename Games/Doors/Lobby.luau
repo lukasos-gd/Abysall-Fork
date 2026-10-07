@@ -42,12 +42,11 @@ local Window = Library:CreateWindow({
     ShowCustomCursor = false,
     AutoShow = true,
     Center = true,
-	TabPadding = 4,
+	TabPadding = 3,
 	MenuFadeTime = 0.15,
     CornerRadius = 8,
     DisableSearch = false,
     MobileButtonsSide = "Left",
-    Size = Library.IsMobile and UDim2.fromOffset(500, 300) or UDim2.fromOffset(720, 600),
 })
 
 Abysall.Interface.ApplyInfoTab(Window)

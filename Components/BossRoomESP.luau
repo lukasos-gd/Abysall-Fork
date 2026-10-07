@@ -41,6 +41,23 @@ return function(Env)
 		})
 	end
 
+	local MaxDistance = 670
+	local LocalPlayer = game:GetService("Players").LocalPlayer
+
+	local function IsFar(Object)
+		local Character = LocalPlayer.Character
+		local Root = Character and Character:FindFirstChild("HumanoidRootPart")
+		local Origin = Root and Root.Position or workspace.CurrentCamera.CFrame.Position
+		local Position
+		if Object:IsA("Model") then
+			Position = Object:GetPivot().Position
+		else
+			Position = Object.Position
+		end
+		local Limit = Shown[Object] and MaxDistance or (MaxDistance - 20)
+		return (Position - Origin).Magnitude > Limit
+	end
+
 	local Refresh
 
 	local function Hook(Object, Attribute)
@@ -78,7 +95,7 @@ return function(Env)
 		for _, Machine in ipairs(Machines) do
 			Hook(Machine, "BoxID")
 			local Id = Machine:GetAttribute("BoxID")
-			if Enabled and Id then
+			if Enabled and Id and not IsFar(Machine) then
 				SetESP(Machine, "Deposit [" .. Id .. "]", Base)
 			else
 				SetESP(Machine, nil)
@@ -90,7 +107,7 @@ return function(Env)
 			local Id = Box:GetAttribute("Tool_BoxID")
 			local Text
 			local Color
-			if Enabled and Id then
+			if Enabled and Id and not IsFar(Box) then
 				if Needed[Id] then
 					Text = "Box [" .. Id .. "]"
 					Color = Base
@@ -122,7 +139,16 @@ return function(Env)
 		Refresh()
 	end)
 
+	local Running = true
+	task.spawn(function()
+		while Running do
+			task.wait(0.5)
+			pcall(Refresh)
+		end
+	end)
+
 	Abysall.Cleanup:Add(function()
+		Running = false
 		for Object in pairs(Shown) do
 			pcall(Functions.RemoveESP, Object)
 		end
