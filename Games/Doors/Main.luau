@@ -4492,6 +4492,15 @@ end)
 if not ArchivesSuccess then
 	warn("[Abysall Fork] Archives ESP failed: " .. tostring(ArchivesError))
 end
+local BossSuccess, BossError = pcall(function()
+	Abysall.Load("Components/BossRoomESP.luau")({
+		Functions = Functions,
+		Groupbox = Groupboxes.Visuals_ESP_Toggles
+	})
+end)
+if not BossSuccess then
+	warn("[Abysall Fork] Boss room ESP failed: " .. tostring(BossError))
+end
 local QuickSuccess, QuickError = pcall(function()
 	Abysall.Load("Components/QuickTab.luau")(Window)
 end)
