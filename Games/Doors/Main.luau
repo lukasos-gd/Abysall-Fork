@@ -1599,6 +1599,10 @@ for Index, Name in pairs(ItemNames) do
 		table.insert(ItemsToNotify, Name)
 	end
 end
+if not table.find(ItemsToNotify, "Paper Plane") then
+	table.insert(ItemsToNotify, "Paper Plane")
+end
+table.sort(ItemsToNotify)
 
 Groupboxes.Visuals_Entities:AddDropdown("NotifyItemList", {
 	Text = "Item List",
@@ -1711,6 +1715,26 @@ Groupboxes.Visuals_ESP_Toggles:AddToggle("HidingSpotESPToggle", { Text = "Hiding
 Groupboxes.Visuals_ESP_Toggles:AddToggle("PlayerESPToggle",     { Text = "Players",      Default = false, Tooltip = "Highlights other players." })
 Groupboxes.Visuals_ESP_Toggles:AddToggle("ChestESPToggle",      { Text = "Chests",       Default = false, Tooltip = "Highlights objects that can contain loot." })
 Groupboxes.Visuals_ESP_Toggles:AddToggle("ItemESPToggle",       { Text = "Items",        Default = false, Tooltip = "Highlights all collectable items/consumables." })
+local ItemESPValues = table.clone(ItemsToNotify)
+if not table.find(ItemESPValues, "Green Herb") then
+	table.insert(ItemESPValues, "Green Herb")
+end
+table.sort(ItemESPValues)
+Groupboxes.Visuals_ESP_Toggles:AddDropdown("ItemESPList", {
+	Text = "Item ESP List",
+	Values = ItemESPValues,
+	Multi = true,
+	AllowNull = true
+})
+do
+	local AllItems = {}
+	for _, Label in ipairs(ItemESPValues) do
+		AllItems[Label] = true
+	end
+	pcall(function()
+		Options.ItemESPList:SetValue(AllItems)
+	end)
+end
 Groupboxes.Visuals_ESP_Toggles:AddToggle("CurrencyESPToggle",   { Text = "Currency",     Default = false, Tooltip = "Highlights all currency that spawns." })
 Groupboxes.Visuals_ESP_Toggles:AddToggle("LadderESPToggle",     { Text = "Ladders",      Default = false, Tooltip = "Highlights ladders that can be used to disable the anticheat." })
 Groupboxes.Visuals_ESP_Toggles:AddDivider()
@@ -1820,11 +1844,23 @@ Toggles.ItemESPToggle:OnChanged(function(Value)
 	for _, Object in Objects.Items do
 		if Value then
 			local Label = ItemNames[Object.Name] or (Object.Name == "Green_Herb" and "Green Herb")
-			if Label then
+			if Label and Options.ItemESPList.Value[Label] then
 				Functions.AddESP({ Object = Object, Text = Label, Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil)
 			end
 		else
 			Functions.RemoveESP(Object)
+		end
+	end
+end)
+Options.ItemESPList:OnChanged(function()
+	for _, Object in Objects.Items do
+		local Label = ItemNames[Object.Name] or (Object.Name == "Green_Herb" and "Green Herb")
+		if Label then
+			if Toggles.ItemESPToggle.Value and Options.ItemESPList.Value[Label] then
+				Functions.AddESP({ Object = Object, Text = Label, Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil)
+			else
+				Functions.RemoveESP(Object)
+			end
 		end
 	end
 end)
@@ -1906,6 +1942,7 @@ Groupboxes.Visuals_ESP_Settings:AddSlider("ESPTextTransparency",        { Text =
 Groupboxes.Visuals_ESP_Settings:AddSlider("ESPTextOutlineTransparency", { Text = "Text Outline Transparency", Min = 0, Max = 1, Default = 0,    Rounding = 2, Compact = true })
 Groupboxes.Visuals_ESP_Settings:AddSlider("ESPFadeTime",                { Text = "Fade Time",                 Min = 0, Max = 1, Default = 0.25, Rounding = 2, Compact = true })
 Groupboxes.Visuals_ESP_Settings:AddSlider("ESPRenderLimit",             { Text = "Render Limit",              Min = 30, Max = 240, Default = 240, Rounding = 0, Compact = true })
+Groupboxes.Visuals_ESP_Settings:AddSlider("ESPMaxDistance",             { Text = "Max Distance",              Min = 100, Max = 5000, Default = 1000, Rounding = 0, Compact = true, Suffix = " studs" })
 Groupboxes.Visuals_ESP_Settings:AddSlider("ESPTextSize",                { Text = "Text Size",                 Min = 12, Max = 24, Default = 20, Rounding = 0, Compact = true })
 Groupboxes.Visuals_ESP_Settings:AddDropdown("ESPTextFont", {
 	Text = "Text Font",
@@ -1945,6 +1982,7 @@ Options.ESPTextTransparency:OnChanged(function(V)        Abysall.ESPLibrary:SetT
 Options.ESPTextOutlineTransparency:OnChanged(function(V) Abysall.ESPLibrary:SetTextOutlineTransparency(V) end)
 Options.ESPFadeTime:OnChanged(function(V)        Abysall.ESPLibrary:SetFadeTime(V) end)
 Options.ESPRenderLimit:OnChanged(function(V)     Abysall.ESPLibrary:SetRenderLimit(V) end)
+Options.ESPMaxDistance:OnChanged(function(V)      Abysall.ESPLibrary.MaxDistance = V end)
 Options.ESPTextSize:OnChanged(function(V)        Abysall.ESPLibrary:SetTextSize(V) end)
 Options.ESPTextFont:OnChanged(function(V)        Abysall.ESPLibrary:SetFont(Enum.Font[V]) end)
 Toggles.ESPTracersToggle:OnChanged(function(V)   Abysall.ESPLibrary:SetTracers(V) end)
@@ -3524,7 +3562,7 @@ Functions.HandleObject = function(Object)
 		if Toggles.ChestESPToggle.Value then Functions.AddESP({ Object = Object, Text = "Mouse", Color = Options.ChestESPColor.Value }, true) end
 		table.insert(Objects.Chests, Object)
 	elseif ItemNames[Name] and Object:FindFirstChild("ModulePrompt") then
-		if Toggles.ItemESPToggle.Value then Functions.AddESP({ Object = Object, Text = ItemNames[Name], Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil) end
+		if Toggles.ItemESPToggle.Value and Options.ItemESPList.Value[ItemNames[Name]] then Functions.AddESP({ Object = Object, Text = ItemNames[Name], Color = Options.ItemESPColor.Value }, Object:GetAttribute("ParentRoom") ~= nil) end
 		if Name == "LotusHolder" or Name == "LotusPetalPickup" then
 			Object.Handle:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
 				Abysall.ESPLibrary:RemoveESP(Object)
@@ -3542,7 +3580,7 @@ Functions.HandleObject = function(Object)
 
 		table.insert(Objects.Items, Object)
 	elseif Name == "Green_Herb" then
-		if Toggles.ItemESPToggle.Value then Functions.AddESP({ Object = Object, Text = "Green Herb", Color = Options.ItemESPColor.Value }, true) end
+		if Toggles.ItemESPToggle.Value and Options.ItemESPList.Value["Green Herb"] then Functions.AddESP({ Object = Object, Text = "Green Herb", Color = Options.ItemESPColor.Value }, true) end
 		table.insert(Objects.Items, Object)
 	elseif Name == "GoldPile" and Object:GetAttribute("GoldValue") then
 		if Toggles.CurrencyESPToggle.Value then Functions.AddESP({ Object = Object, Text = "Gold Pile [" .. Object:GetAttribute("GoldValue") .. "]", Color = Options.CurrencyESPColor.Value }, true) end
@@ -4491,6 +4529,41 @@ end)
 if not ArchivesSuccess then
 	warn("[Abysall Fork] Archives ESP failed: " .. tostring(ArchivesError))
 end
+pcall(function()
+	local Combined = {}
+	local SeenLabels = {}
+	local function AddLabel(Label)
+		if type(Label) == "string" and not SeenLabels[Label] then
+			SeenLabels[Label] = true
+			table.insert(Combined, Label)
+		end
+	end
+	for _, Dropdown in ipairs({ Options.EntityList, Options.EntityESPOptions }) do
+		for _, Value in ipairs(Dropdown.Values) do
+			AddLabel(Value)
+		end
+	end
+	for _, Data in pairs(Entities) do
+		AddLabel(Data.Alias)
+	end
+	for _, Label in pairs(EntityESPLabels) do
+		AddLabel(Label)
+	end
+	table.sort(Combined)
+	Options.EntityList:SetValues(Combined)
+	Options.EntityESPOptions:SetValues(Combined)
+end)
+
+local ObjectivesSuccess, ObjectivesError = pcall(function()
+	Abysall.Load("Components/ObjectivesExtra.luau")({
+		Functions = Functions,
+		ItemNames = ItemNames
+	})
+end)
+if not ObjectivesSuccess then
+	warn("[Abysall Fork] Extra objectives failed: " .. tostring(ObjectivesError))
+end
+
 local ItemsSuccess, ItemsError = pcall(function()
 	Abysall.Load("Components/ArchivesItemsESP.luau")({
 		Functions = Functions,

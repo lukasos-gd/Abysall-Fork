@@ -13,6 +13,7 @@ local Library = {
 	TextOutlineTransparency = 0,
 	FadeTime = 0,
 	RenderLimit = 240,
+	MaxDistance = 1000,
 	TracerSize = 0.5,
 	ArrowRadius = 200,
 	TextSize = 20,
@@ -260,6 +261,10 @@ function Library:AddESP(Parameters)
 
 			local ObjectPos = Object:GetPivot().Position
 			local ScreenPoint, OnScreen = Camera:WorldToViewportPoint(ObjectPos)
+			local Far = (Camera.CFrame.Position - ObjectPos).Magnitude > Library.MaxDistance
+			if Far then
+				OnScreen = false
+			end
 
 			local Frame = Library.Frames[Object]
 			local Label = Library.Labels[Object]
@@ -365,7 +370,7 @@ function Library:AddESP(Parameters)
 					Library.ArrowsTable[Object] = Arrow
 					PlayTween(Arrow, { ImageTransparency = 0 })
 				elseif Arrow and Library.ElementsEnabled[Object] == true then
-					if OnScreen and ScreenPoint.Z > 0 then
+					if Far or (OnScreen and ScreenPoint.Z > 0) then
 						Arrow.Visible = false
 					else
 						local ScreenSize = Camera.ViewportSize

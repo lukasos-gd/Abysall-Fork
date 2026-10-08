@@ -1,7 +1,19 @@
 {
-  "version": "1.5.0",
+  "version": "1.7.0",
   "date": "10/1/2026",
   "entries": [
+    {
+      "type": "add",
+      "text": "Item ESP List dropdown (all items plus Archives items); Max Distance setting, ESP hides beyond 1000 studs by default"
+    },
+    {
+      "type": "add",
+      "text": "Fire Alarm under Objectives ESP (name match)"
+    },
+    {
+      "type": "change",
+      "text": "Every known entity is now an option in both entity lists; every item is in the Item List; new Archives items add themselves"
+    },
     {
       "type": "add",
       "text": "ESP and notifications for Archives items (any item the main list doesn't know), toggle: Archives Items"

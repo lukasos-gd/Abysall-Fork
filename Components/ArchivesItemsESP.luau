@@ -42,12 +42,37 @@ return function(Env)
 		return (Object:GetPivot().Position - Origin).Magnitude
 	end
 
+	local function Register(Label)
+		for _, Name in ipairs({ "NotifyItemList", "ItemESPList" }) do
+			local Dropdown = Options[Name]
+			if Dropdown and type(Dropdown.Values) == "table" and not table.find(Dropdown.Values, Label) then
+				local Values = table.clone(Dropdown.Values)
+				table.insert(Values, Label)
+				table.sort(Values)
+				pcall(function()
+					Dropdown:SetValues(Values)
+				end)
+				local Selected = table.clone(type(Dropdown.Value) == "table" and Dropdown.Value or {})
+				Selected[Label] = true
+				pcall(function()
+					Dropdown:SetValue(Selected)
+				end)
+			end
+		end
+	end
+
+	local function Wanted(Label)
+		local Selected = Options.NotifyItemList.Value
+		return type(Selected) == "table" and Selected[Label] == true
+	end
+
 	local function Refresh(Object)
 		local Label = Alive[Object]
 		if not Label then
 			return
 		end
-		if Toggles.ItemESPToggle.Value and Toggles.ArchivesItemsToggle.Value then
+		local ESPSelected = Options.ItemESPList.Value
+		if Toggles.ItemESPToggle.Value and Toggles.ArchivesItemsToggle.Value and type(ESPSelected) == "table" and ESPSelected[Label] then
 			if not Shown[Object] then
 				Shown[Object] = true
 				pcall(Functions.AddESP, {
@@ -88,9 +113,10 @@ return function(Env)
 
 		local Label = Object:GetAttribute("Tool_NameSingular") or (Pickup and Humanize(Pickup)) or Humanize(Object.Name)
 		Alive[Object] = Label
+		Register(Label)
 		Refresh(Object)
 
-		if Toggles.NotifyItemsToggle.Value and Toggles.ArchivesItemsToggle.Value then
+		if Toggles.NotifyItemsToggle.Value and Toggles.ArchivesItemsToggle.Value and Wanted(Label) then
 			local Now = os.clock()
 			if not LastNotify[Label] or Now - LastNotify[Label] >= 5 then
 				LastNotify[Label] = Now
@@ -156,6 +182,7 @@ return function(Env)
 
 	Toggles.ItemESPToggle:OnChanged(RefreshAll)
 	Toggles.ArchivesItemsToggle:OnChanged(RefreshAll)
+	Options.ItemESPList:OnChanged(RefreshAll)
 	Options.ItemESPColor:OnChanged(function()
 		for Object in pairs(Shown) do
 			Shown[Object] = nil
