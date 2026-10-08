@@ -11,7 +11,7 @@ local BaseUrl = "https://raw.githubusercontent.com/lukasos-gd/Abysall-Fork/" .. 
 
 local Abysall = {
     Legit = true,
-    Version = "1.7.0",
+    Version = "1.7.2",
     Ref = Ref,
     BaseUrl = BaseUrl
 }

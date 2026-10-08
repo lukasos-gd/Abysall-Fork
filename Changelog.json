@@ -1,7 +1,15 @@
 {
-  "version": "1.7.0",
+  "version": "1.7.2",
   "date": "10/1/2026",
   "entries": [
+    {
+      "type": "fix",
+      "text": "Custom Entity is back in the entity lists"
+    },
+    {
+      "type": "fix",
+      "text": "All known Archives items are listed in the Item List and Item ESP List; Frozen Ambush and Custom Entity no longer added to the entity lists"
+    },
     {
       "type": "add",
       "text": "Item ESP List dropdown (all items plus Archives items); Max Distance setting, ESP hides beyond 1000 studs by default"

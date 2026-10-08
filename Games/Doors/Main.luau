@@ -1599,8 +1599,23 @@ for Index, Name in pairs(ItemNames) do
 		table.insert(ItemsToNotify, Name)
 	end
 end
-if not table.find(ItemsToNotify, "Paper Plane") then
-	table.insert(ItemsToNotify, "Paper Plane")
+local ArchivesItemLabels = {
+	"Flare", "Pocket Mirror", "Briefcase", "Leftovers", "Paper Plane", "Fih Flakes", "Honey Pot",
+	"Pizza", "Water Cup", "Ticket", "Sally's Toy", "Pack Of Gween Soda", "Lamp", "Jerry Can",
+	"Large Screw", "Crate Of Bottles", "Broken Monitor", "Damaged Hat", "Lunch Box", "Honcho Mug",
+	"Stupid Horse", "Cart-To-Go"
+}
+for _, Label in ipairs(ArchivesItemLabels) do
+	local Exists = false
+	for _, Existing in ipairs(ItemsToNotify) do
+		if string.lower(Existing) == string.lower(Label) then
+			Exists = true
+			break
+		end
+	end
+	if not Exists then
+		table.insert(ItemsToNotify, Label)
+	end
 end
 table.sort(ItemsToNotify)
 
@@ -4544,7 +4559,9 @@ pcall(function()
 		end
 	end
 	for _, Data in pairs(Entities) do
-		AddLabel(Data.Alias)
+		if Data.Alias ~= "Frozen Ambush" then
+			AddLabel(Data.Alias)
+		end
 	end
 	for _, Label in pairs(EntityESPLabels) do
 		AddLabel(Label)
